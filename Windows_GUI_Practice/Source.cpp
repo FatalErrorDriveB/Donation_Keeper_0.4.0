@@ -12,14 +12,18 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void AddMenus(HWND);
 void AddControls(HWND);
+void LoadImages();
+void AddDonation();
 
-//Global Variables
+//Global Variables & Handlers
 HMENU hMenu;
 HWND hDonorName;
 HWND hAmount;
 HWND hTotal;
 HWND hDonationList;
+HWND hLogo;
 DonationHandler *DH = new DonationHandler();
+HBITMAP logo;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -59,6 +63,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+	//Variable
+	int mb{};
+
+	//Switch crap
 	switch (msg)
 	{
 	case WM_COMMAND:
@@ -67,20 +75,33 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		case NULL:
 			break;
 		case File_Menu_Exit:
-			DestroyWindow(hwnd);
+			mb = MessageBoxW(hwnd, L"Are you sure you want to quit?", L"Conformation", MB_YESNO | MB_ICONQUESTION);
+			if(mb == IDYES)
+			{
+				DestroyWindow(hwnd);
+			}
 			break;
 		case File_Menu_AddNewDonation:
-			//Here is where I'll add my code
+			//Donation setup
 			wchar_t DonorName[100];
 			wchar_t AmountDonated[100];
 			GetWindowTextW(hDonorName, DonorName, 100);
 			GetWindowTextW(hAmount, AmountDonated, 100);
 			DH->Convert(DonorName, AmountDonated);
-			DH->AddDonation();
-			SetWindowTextW(hDonorName, L"");
-			SetWindowTextW(hAmount, L"");
-			SetWindowTextW(hTotal, DH->guiTotal); ////Close but not yet working...
-			DH->UpdateList();
+			//Check for blank input then add donation
+			if(DH->CallCurrentAmount() == 0)
+			{
+				mb = MessageBoxW(hwnd, L"The amount donated is $0, are you sure you wish to add this?",
+					L"Add $0 donation?", MB_YESNO | MB_ICONQUESTION);
+				if(mb == IDYES)
+				{
+					AddDonation();
+				} else {
+					MessageBoxW(hwnd, L"The donation was not added.", L"Information", MB_OK | MB_ICONINFORMATION);
+				}
+			} else {
+				AddDonation();
+			}
 			break;
 		case Help_Menu_ShowDocumentation:
 			MessageBeep(MB_ICONINFORMATION);
@@ -92,6 +113,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		break;
 
 	case WM_CREATE:
+		LoadImages();
 		AddMenus(hwnd);
 		AddControls(hwnd);
 		break;
@@ -131,40 +153,74 @@ void AddMenus(HWND hWnd)
 
 void AddControls(HWND hwnd) 
 {
+	//Add new donation lable
 	CreateWindowW(L"Static", L"Add New Donation:", 
 		WS_VISIBLE | WS_CHILD | SS_LEFT | WS_BORDER,
 		10, 20, 350, 65,
 		hwnd, NULL, NULL, NULL);
+	//Name of doner prefix
 	CreateWindowW(L"Static", L"Name of Donor: ",
 		WS_VISIBLE | WS_CHILD | SS_LEFT,
 		20, 40, 150, 20,
 		hwnd, NULL, NULL, NULL);
-	hDonorName = CreateWindowW(L"Edit", L"John Doe",
+	//Name of doner
+	hDonorName = CreateWindowW(L"Edit", L"Unknown",
 		WS_VISIBLE | WS_CHILD | SS_LEFT | WS_BORDER,
 		140, 40, 200, 15,
 		hwnd, NULL, NULL, NULL);
+	//Amount to donate prefix
 	CreateWindowW(L"Static", L"Amount Donated: $",
 		WS_VISIBLE | WS_CHILD | SS_LEFT,
 		20, 60, 150, 20,
 		hwnd, NULL, NULL, NULL);
+	//Amount to donate
 	hAmount = CreateWindowW(L"Edit", L"0.00",
 		WS_VISIBLE | WS_CHILD | SS_LEFT | WS_BORDER,
 		145, 60, 200, 15,
 		hwnd, NULL, NULL, NULL);
+	//Donation Total prefix
 	CreateWindowW(L"Static", L"Donation Total: $", 
 		WS_VISIBLE | WS_CHILD | WS_BORDER | SS_LEFT, 
 		150, 400, 200, 22, hwnd,
 		NULL, NULL, NULL);
+	//Donation Total
 	hTotal = CreateWindowW(L"Static", L"0.00",
 		WS_VISIBLE | WS_CHILD | SS_LEFT,
 		265, 402, 50, 18,
 		hwnd, NULL, NULL, NULL);
+	//Add new donation Button
 	CreateWindowW(L"button", L"Add new donation",
 		WS_VISIBLE | WS_CHILD | SS_CENTER,
 		120, 90, 120, 30,
 		hwnd, (HMENU)File_Menu_AddNewDonation, NULL, NULL);
+	//Donation List Window
 	hDonationList = CreateWindowW(L"Static", L"Donation List",
 		WS_VISIBLE | WS_CHILD | WS_BORDER | SS_LEFT | WS_VSCROLL,
 		10, 125, 350, 250, hwnd,
 		NULL, NULL, NULL);
+	//Logo
+	hLogo = CreateWindowW(L"Static", NULL, 
+		WS_VISIBLE | WS_CHILD | SS_BITMAP | WS_BORDER,
+		450, 10, 20, 20, hwnd,
+		NULL, NULL, NULL);
+	SendMessageW(hLogo, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)logo);
+}
+
+void LoadImages() 
+{
+	logo = (HBITMAP)LoadImageW(NULL, L"logo.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+}
+
+
+void AddDonation() 
+{
+	if (DH->CallCurrentName() == "")
+	{
+		DH->SetCurrentName("Unknown");
+	}
+	DH->AddDonation();
+	SetWindowTextW(hDonorName, L"Unknown");
+	SetWindowTextW(hAmount, L"0.00");
+	SetWindowTextW(hTotal, DH->guiTotal); ////Close but not yet working...
+	DH->UpdateList();
 }

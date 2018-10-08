@@ -61,6 +61,26 @@ DonationHandler::~DonationHandler()
 {
 }
 
+std::string DonationHandler::CallCurrentName()
+{
+	return std::string(this->name);
+}
+
+double DonationHandler::CallCurrentAmount()
+{
+	return this->amount;
+}
+
+double DonationHandler::CallCurrentTotal()
+{
+	return this->total;
+}
+
+void DonationHandler::SetCurrentName(std::string name)
+{
+	this->name = name;
+}
+
 void DonationHandler::AddDonation()
 {
 	////Run the file check here

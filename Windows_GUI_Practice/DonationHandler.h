@@ -23,6 +23,12 @@ public:
 	DonationHandler();
 	virtual ~DonationHandler();
 
+	//Getters and setters
+	std::string CallCurrentName();
+	double CallCurrentAmount();
+	double CallCurrentTotal();
+	void SetCurrentName(std::string);
+
 	//Public Functions
 	void AddDonation();
 	void ShowDonationList();
