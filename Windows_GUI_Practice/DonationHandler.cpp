@@ -3,7 +3,7 @@
 void DonationHandler::CheckDonationFile()
 {
 	//This function checks for the donation file and creates it if it does not exist
-	if(!std::fstream("donations.txt"))
+	if(!std::fstream(this->donationFilePath))
 	{
 		std::ofstream file("donations.txt", std::ios::trunc);
 		file << 0;
@@ -31,7 +31,7 @@ void DonationHandler::CurrentTotal()
 {
 	std::string currentTotal{};
 
-	std::fstream file("donations.txt", std::ios::in | std::ios::out);
+	std::fstream file(this->donationFilePath, std::ios::in | std::ios::out);
 	file >> currentTotal;
 	file.close();
 
@@ -39,16 +39,13 @@ void DonationHandler::CurrentTotal()
 	this->total = tempTotal;
 }
 
-void DonationHandler::SetTotalToGuiFormat()
+LPCWSTR DonationHandler::SetTotalToGuiFormat()
 {
-	double tempDTotal = this->total;
-	wchar_t tempCTotal = (wchar_t)tempDTotal;
-	this->guiTotal = (LPCWSTR)tempCTotal;
-}
-
-void DonationHandler::UpdateList()
-{
-	//Copy contents of file to LPCWSTR format and send to the window.
+	double tempTotal = this->total;
+	std::wstringstream *test = new std::wstringstream();
+	*test << tempTotal;
+	LPCWSTR lTotal = test->str().c_str();
+	return lTotal;
 }
 
 
@@ -81,6 +78,24 @@ void DonationHandler::SetCurrentName(std::string name)
 	this->name = name;
 }
 
+std::string DonationHandler::GetDonationFilePath()
+{
+	return this->donationFilePath;
+}
+
+char * DonationHandler::GetFilePathChar()
+{
+	std::string stringPath = this->donationFilePath;
+	char *charPath = new char[stringPath.length() + 1];
+	strcpy_s(charPath, stringPath.length() + 1, stringPath.c_str());
+	return charPath;
+}
+
+void DonationHandler::SetDonationFilePath(char path[100])
+{
+	this->donationFilePath = path;
+}
+
 void DonationHandler::AddDonation()
 {
 	////Run the file check here
@@ -90,7 +105,7 @@ void DonationHandler::AddDonation()
 	CurrentTotal();
 
 	//Opening file
-	std::fstream file("donations.txt", std::ios::in | std::ios::out);
+	std::fstream file(this->donationFilePath, std::ios::in | std::ios::out);
 
 	//Updating total
 	this->total += this->amount;
@@ -98,11 +113,7 @@ void DonationHandler::AddDonation()
 	file.close();
 
 	//Adding to file
-	file.open("donations.txt", std::ios::in | std::ios::out | std::ios::app);
+	file.open(this->donationFilePath, std::ios::in | std::ios::out | std::ios::app);
 	file << std::endl << this->name << " $" << this->amount;
 	file.close();
-}
-
-void DonationHandler::ShowDonationList()
-{
 }

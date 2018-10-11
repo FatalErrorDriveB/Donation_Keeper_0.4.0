@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <fstream>
 #include <Windows.h>
 
@@ -10,6 +11,7 @@ private:
 	std::string name{};
 	double amount{};
 	double total{};
+	std::string donationFilePath = "donations.txt";
 
 	void CheckDonationFile();
 	
@@ -17,7 +19,6 @@ private:
 protected:
 
 public:
-	LPCWSTR guiTotal{};
 
 	//Constructors & Destructor
 	DonationHandler();
@@ -28,12 +29,13 @@ public:
 	double CallCurrentAmount();
 	double CallCurrentTotal();
 	void SetCurrentName(std::string);
+	std::string GetDonationFilePath();
+	char* GetFilePathChar();
+	void SetDonationFilePath(char path[100]);
 
 	//Public Functions
 	void AddDonation();
-	void ShowDonationList();
 	void Convert(wchar_t*, wchar_t*);
 	void CurrentTotal();
-	void SetTotalToGuiFormat();
-	void UpdateList();
+	LPCWSTR SetTotalToGuiFormat();
 };

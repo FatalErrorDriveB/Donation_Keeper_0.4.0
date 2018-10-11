@@ -1,5 +1,8 @@
 ////Window API practice
 #include <Windows.h>
+#include <iostream>
+#include <string>
+#include <fstream>
 #include "DonationHandler.h"
 
 //Define All Menu Calls Here
@@ -7,6 +10,8 @@
 #define Help_Menu_ShowDocumentation 3
 #define File_Menu_Exit 5
 #define Help_SubMenu_HowToUse 4
+#define OPEN_FILE_BUTTON 2
+#define SHOW_DONATIONS 6
 
 //Prototyping
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -14,6 +19,8 @@ void AddMenus(HWND);
 void AddControls(HWND);
 void LoadImages();
 void AddDonation();
+void DisplayDonations(char*);
+void OpenFile(HWND);
 
 //Global Variables & Handlers
 HMENU hMenu;
@@ -103,6 +110,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 				AddDonation();
 			}
 			break;
+		case OPEN_FILE_BUTTON:
+			//Opening donation file code goes here
+			OpenFile(hwnd);
+			break;
+		case SHOW_DONATIONS:
+			DisplayDonations(DH->GetFilePathChar());
+			break;
 		case Help_Menu_ShowDocumentation:
 			MessageBeep(MB_ICONINFORMATION);
 			break;
@@ -119,6 +133,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		break;
 
 	case WM_DESTROY:
+		DestroyWindow(hwnd);
 		PostQuitMessage(0);
 		break;
 
@@ -136,6 +151,7 @@ void AddMenus(HWND hWnd)
 	HMENU helpSubMenu = CreateMenu();
 
 	//hFileMenu
+	AppendMenu(hFileMenu, MF_POPUP, OPEN_FILE_BUTTON, "Open donation file");
 	AppendMenu(hFileMenu, MF_STRING, File_Menu_Exit, "Exit Program");
 
 	//HelpSubMenus
@@ -181,12 +197,12 @@ void AddControls(HWND hwnd)
 	//Donation Total prefix
 	CreateWindowW(L"Static", L"Donation Total: $", 
 		WS_VISIBLE | WS_CHILD | WS_BORDER | SS_LEFT, 
-		150, 400, 200, 22, hwnd,
+		160, 400, 200, 22, hwnd,
 		NULL, NULL, NULL);
 	//Donation Total
 	hTotal = CreateWindowW(L"Static", L"0.00",
 		WS_VISIBLE | WS_CHILD | SS_LEFT,
-		265, 402, 50, 18,
+		275, 402, 50, 18,
 		hwnd, NULL, NULL, NULL);
 	//Add new donation Button
 	CreateWindowW(L"button", L"Add new donation",
@@ -204,6 +220,11 @@ void AddControls(HWND hwnd)
 		450, 10, 20, 20, hwnd,
 		NULL, NULL, NULL);
 	SendMessageW(hLogo, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)logo);
+	//Show Donation List
+	CreateWindowW(L"button", L"Show donation list", 
+		WS_CHILD | WS_VISIBLE | WS_BORDER,
+		10, 390, 137, 32, hwnd,
+		(HMENU)SHOW_DONATIONS, NULL, NULL);
 }
 
 void LoadImages() 
@@ -221,6 +242,42 @@ void AddDonation()
 	DH->AddDonation();
 	SetWindowTextW(hDonorName, L"Unknown");
 	SetWindowTextW(hAmount, L"0.00");
-	SetWindowTextW(hTotal, DH->guiTotal); ////Close but not yet working...
-	DH->UpdateList();
+	SetWindowTextW(hTotal, DH->SetTotalToGuiFormat()); ////Close but not yet working... AND I DON'T KNOW WHY!!!!!!
+}
+
+
+void OpenFile(HWND hwnd) 
+{
+	char fileName[100];
+
+	OPENFILENAME ofn;
+	ZeroMemory(&ofn, sizeof(OPENFILENAME)); //Sets all ofn elements to 0
+
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFile = fileName;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = 100;
+	ofn.lpstrFilter = "Text Files\0*.txt\0All Files\0*.*\0";
+	ofn.nFilterIndex = 1;
+
+	GetOpenFileName(&ofn);
+	DH->SetDonationFilePath(ofn.lpstrFile); //Sends the file path to my Donation Handler class
+	DisplayDonations(ofn.lpstrFile);
+}
+
+
+void DisplayDonations(char* path) 
+{
+	std::ifstream file(path, std::ios::binary | std::ios::beg);
+	char *contents = new char[sizeof(file)];
+	
+	file.ignore(SIZE_MAX, '\n'); //Ignores the first line of text, aka; the total.
+	while (!file.eof()) 
+	{
+		file.getline(contents, 50); //Avarage length of line is 14, 50 is more than safe to use
+	}
+	file.close();
+
+	SetWindowText(hDonationList, contents);
 }
