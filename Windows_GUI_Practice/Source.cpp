@@ -110,7 +110,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			GetWindowTextW(hAmount, AmountDonated, 100);
 			DH->Convert(DonorName, AmountDonated);
 			//Check for blank input then add donation
-			if(DH->CallCurrentAmount() == 0)
+			if(DH->CallCurrentAmount() <= 0)
 			{
 				mb = MessageBoxW(hwnd, L"The amount donated is $0, are you sure you wish to add this?",
 					L"Add $0 donation?", MB_YESNO | MB_ICONQUESTION);
@@ -167,7 +167,7 @@ void AddMenus(HWND hWnd)
 	HMENU helpSubMenu = CreateMenu();
 
 	//hFileMenu
-	AppendMenu(hFileMenu, MF_POPUP, OPEN_FILE_BUTTON, "Open donation file");
+	AppendMenu(hFileMenu, MF_POPUP, OPEN_FILE_BUTTON, "Change donation file");
 	AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hFileMenu, MF_STRING, File_Menu_Exit, "Exit Program");
 
@@ -199,7 +199,7 @@ void AddControls(HWND hwnd)
 	//Name of doner
 	hDonorName = CreateWindowW(L"Edit", L"Anonymous",
 		WS_VISIBLE | WS_CHILD | SS_LEFT | WS_BORDER,
-		140, 40, 200, 15,
+		140, 37, 200, 20,
 		hwnd, NULL, NULL, NULL);
 	//Amount to donate prefix
 	CreateWindowW(L"Static", L"Amount Donated: $",
@@ -209,7 +209,7 @@ void AddControls(HWND hwnd)
 	//Amount to donate
 	hAmount = CreateWindowW(L"Edit", L"0.00",
 		WS_VISIBLE | WS_CHILD | SS_LEFT | WS_BORDER,
-		145, 60, 200, 15,
+		145, 60, 200, 20,
 		hwnd, NULL, NULL, NULL);
 	//Donation Total prefix
 	CreateWindowW(L"Static", L"Donation Total: $", 

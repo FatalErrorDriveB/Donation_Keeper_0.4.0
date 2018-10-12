@@ -27,6 +27,7 @@ public:
 	std::string CallCurrentName();
 	double CallCurrentAmount();
 	double CallCurrentTotal();
+	void SetCurrentTotal(double);
 	void SetCurrentName(std::string);
 	std::string GetDonationFilePath();
 	char* GetFilePathChar();

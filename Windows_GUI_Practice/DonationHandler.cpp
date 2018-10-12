@@ -72,6 +72,11 @@ double DonationHandler::CallCurrentTotal()
 	return this->total;
 }
 
+void DonationHandler::SetCurrentTotal(double total)
+{
+	this->total = total;
+}
+
 void DonationHandler::SetCurrentName(std::string name)
 {
 	this->name = name;
@@ -107,12 +112,21 @@ void DonationHandler::AddDonation()
 	std::fstream file(this->donationFilePath, std::ios::in | std::ios::out);
 
 	//Updating total
+
+	if (this->amount < 0)
+	{
+		this->amount = 0.00;
+	}
 	this->total += this->amount;
 	file << this->total;
 	file.close();
 
 	//Adding to file
 	file.open(this->donationFilePath, std::ios::in | std::ios::out | std::ios::app);
+	if (this->amount < 0) 
+	{
+		this->amount = 0.00;
+	}
 	file << std::endl << this->name << " $" << this->amount;
 	file.close();
 }
