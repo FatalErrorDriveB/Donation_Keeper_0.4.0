@@ -214,12 +214,12 @@ void AddControls(HWND hwnd)
 	//Donation Total prefix
 	CreateWindowW(L"Static", L"Donation Total: $", 
 		WS_VISIBLE | WS_CHILD | WS_BORDER | SS_LEFT, 
-		160, 400, 200, 22, hwnd,
+		280, 415, 200, 22, hwnd,
 		NULL, NULL, NULL);
 	//Donation Total
 	hTotal = CreateWindowW(L"Static", L"0.00",
 		WS_VISIBLE | WS_CHILD | SS_LEFT,
-		275, 402, 50, 18,
+		395, 417, 50, 18,
 		hwnd, NULL, NULL, NULL);
 	//Add new donation Button
 	CreateWindowW(L"button", L"Add new donation",
@@ -240,7 +240,7 @@ void AddControls(HWND hwnd)
 	//Show Donation List
 	CreateWindowW(L"button", L"Refreash donation list", 
 		WS_CHILD | WS_VISIBLE | WS_BORDER,
-		5, 395, 152, 32, hwnd,
+		85, 383, 152, 32, hwnd,
 		(HMENU)SHOW_DONATIONS, NULL, NULL);
 }
 
