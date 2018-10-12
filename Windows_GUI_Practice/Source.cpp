@@ -1,3 +1,17 @@
+/*
+* S-Rank Bugs: (FIX NOW!!!!)
+** Clicking open file and not choosing a file will resault in a full freeze
+*
+* A-Rank Bugs: (Fix as soon as possible)
+*
+* B-Rank Bugs: (Should be fixed quickly)
+*
+* C-Rank Bugs: (Fix when you get a chance)
+** Some names underlap the name window and dont show properly as you're typing them
+** The donation list window will not allow you to scroll up or down.
+*
+*/
+
 ////Window API practice
 #include <Windows.h>
 #include <iostream>
@@ -130,6 +144,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		LoadImages();
 		AddMenus(hwnd);
 		AddControls(hwnd);
+		DisplayDonations(DH->GetFilePathChar());
+		DH->SetTotalToGuiFormat(hTotal);
 		break;
 
 	case WM_DESTROY:
@@ -152,6 +168,7 @@ void AddMenus(HWND hWnd)
 
 	//hFileMenu
 	AppendMenu(hFileMenu, MF_POPUP, OPEN_FILE_BUTTON, "Open donation file");
+	AppendMenu(hFileMenu, MF_SEPARATOR, NULL, NULL);
 	AppendMenu(hFileMenu, MF_STRING, File_Menu_Exit, "Exit Program");
 
 	//HelpSubMenus
@@ -180,7 +197,7 @@ void AddControls(HWND hwnd)
 		20, 40, 150, 20,
 		hwnd, NULL, NULL, NULL);
 	//Name of doner
-	hDonorName = CreateWindowW(L"Edit", L"Unknown",
+	hDonorName = CreateWindowW(L"Edit", L"Anonymous",
 		WS_VISIBLE | WS_CHILD | SS_LEFT | WS_BORDER,
 		140, 40, 200, 15,
 		hwnd, NULL, NULL, NULL);
@@ -210,7 +227,7 @@ void AddControls(HWND hwnd)
 		120, 90, 120, 30,
 		hwnd, (HMENU)File_Menu_AddNewDonation, NULL, NULL);
 	//Donation List Window
-	hDonationList = CreateWindowW(L"Static", L"Donation List",
+	hDonationList = CreateWindowW(L"static", L"Donation List",
 		WS_VISIBLE | WS_CHILD | WS_BORDER | SS_LEFT | WS_VSCROLL,
 		10, 125, 350, 250, hwnd,
 		NULL, NULL, NULL);
@@ -221,9 +238,9 @@ void AddControls(HWND hwnd)
 		NULL, NULL, NULL);
 	SendMessageW(hLogo, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)logo);
 	//Show Donation List
-	CreateWindowW(L"button", L"Show donation list", 
+	CreateWindowW(L"button", L"Refreash donation list", 
 		WS_CHILD | WS_VISIBLE | WS_BORDER,
-		10, 390, 137, 32, hwnd,
+		5, 395, 152, 32, hwnd,
 		(HMENU)SHOW_DONATIONS, NULL, NULL);
 }
 
@@ -237,12 +254,13 @@ void AddDonation()
 {
 	if (DH->CallCurrentName() == "")
 	{
-		DH->SetCurrentName("Unknown");
+		DH->SetCurrentName("Anonymous");
 	}
 	DH->AddDonation();
-	SetWindowTextW(hDonorName, L"Unknown");
+	SetWindowTextW(hDonorName, L"Anonymous");
 	SetWindowTextW(hAmount, L"0.00");
-	SetWindowTextW(hTotal, DH->SetTotalToGuiFormat()); ////Close but not yet working... AND I DON'T KNOW WHY!!!!!!
+	DH->SetTotalToGuiFormat(hTotal);
+	DisplayDonations(DH->GetFilePathChar());
 }
 
 
@@ -267,17 +285,18 @@ void OpenFile(HWND hwnd)
 }
 
 
-void DisplayDonations(char* path) 
+void DisplayDonations(char* path) //It works!!!!!!!!!
 {
-	std::ifstream file(path, std::ios::binary | std::ios::beg);
+	std::ifstream file(path, std::ios::binary);
 	char *contents = new char[sizeof(file)];
+	std::stringstream fileList;
 	
 	file.ignore(SIZE_MAX, '\n'); //Ignores the first line of text, aka; the total.
 	while (!file.eof()) 
 	{
-		file.getline(contents, 50); //Avarage length of line is 14, 50 is more than safe to use
+		file.getline(contents, 50, '\n'); //Avarage length of line is 14, 50 is more than safe to use
+		fileList << contents << "\n" << "____________________" << "\n";
 	}
+	SetWindowText(hDonationList, fileList.str().c_str());
 	file.close();
-
-	SetWindowText(hDonationList, contents);
 }

@@ -39,13 +39,12 @@ void DonationHandler::CurrentTotal()
 	this->total = tempTotal;
 }
 
-LPCWSTR DonationHandler::SetTotalToGuiFormat()
+void DonationHandler::SetTotalToGuiFormat(HWND hwnd)
 {
-	double tempTotal = this->total;
-	std::wstringstream *test = new std::wstringstream();
-	*test << tempTotal;
-	LPCWSTR lTotal = test->str().c_str();
-	return lTotal;
+	CurrentTotal();
+	std::stringstream total;
+	total << this->total;
+	SetWindowText(hwnd, total.str().c_str());
 }
 
 

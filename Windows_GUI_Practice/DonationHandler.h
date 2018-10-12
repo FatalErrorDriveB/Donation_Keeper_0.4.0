@@ -19,7 +19,6 @@ private:
 protected:
 
 public:
-
 	//Constructors & Destructor
 	DonationHandler();
 	virtual ~DonationHandler();
@@ -37,5 +36,5 @@ public:
 	void AddDonation();
 	void Convert(wchar_t*, wchar_t*);
 	void CurrentTotal();
-	LPCWSTR SetTotalToGuiFormat();
+	void SetTotalToGuiFormat(HWND);
 };
